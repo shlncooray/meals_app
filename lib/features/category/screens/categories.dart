@@ -10,12 +10,12 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
-  late List<Category> foodCategories;
+  late Future<List<Category>> foodCategories;
 
   @override
   void initState() {
     super.initState();
-    foodCategories = fetchCategories();
+    foodCategories = fetchCategoriesFutue();
     // #TODO - Fetch via HTTP Rest API
   }
 
@@ -24,24 +24,32 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    // #TODO - Add FutureBuilder<List<Category>> return as body
-
     return Scaffold(
-        body: ListView.builder(
-      itemCount: foodCategories.length,
-      itemBuilder: (ctx, index) {
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: CategoryItem(
-            category: foodCategories[index],
-            onSelectCategory: () {
-              _selectCategory(context, foodCategories[index]);
-            },
-          ),
-        );
+        body: FutureBuilder<List<Category>>(
+      future: foodCategories,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return GridView(
+            padding: const EdgeInsets.all(10),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.25,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20),
+            children: [
+              ...snapshot.data!.map((cat) => CategoryItem(
+                  category: cat,
+                  onSelectCategory: () {
+                    _selectCategory(context, cat);
+                  }))
+            ],
+          );
+        } else if (snapshot.hasError) {
+          return Center(child: Text('${snapshot.error}'));
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
       },
     ));
-
-    // #TODO - Change ListView to GridView
   }
 }
