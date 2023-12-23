@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/meals_mock.dart';
 import 'package:meals_app/features/category/widgets/category_item.dart';
+import 'package:meals_app/features/meal/screens/meals.dart';
 import 'package:meals_app/models/category.dart';
+import 'package:meals_app/models/meal.dart';
 
 class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen({super.key});
+  const CategoriesScreen({super.key, required this.onFavouriteToogle});
+
+  final void Function(Meal) onFavouriteToogle;
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
@@ -16,12 +21,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void initState() {
     super.initState();
     foodCategories = fetchCategoriesFutue();
-    // #TODO - Fetch via HTTP Rest API
   }
 
   void _selectCategory(BuildContext context, Category category) {
-    // #TODO - Implement Navigation to Selected Food Category Meal Screen
+    List<Meal> filteredMeals = mealList
+        .where((meal) => meal.categories.contains(category.id))
+        .toList();
+
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (ctx) => MealsScreen(
+            title: category.title,
+            meals: filteredMeals,
+            onFavouriteToogle: widget.onFavouriteToogle)));
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
