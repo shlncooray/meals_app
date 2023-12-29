@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:meals_app/data/meals_mock.dart';
 import 'package:meals_app/features/category/screens/categories.dart';
 import 'package:meals_app/features/filters/screens/filters.dart';
 import 'package:meals_app/features/meal/screens/meals.dart';
+import 'package:meals_app/models/filter.dart';
 import 'package:meals_app/models/meal.dart';
 import 'package:meals_app/widgets/app_drawer.dart';
 
@@ -17,6 +19,7 @@ class AppTabsScreen extends StatefulWidget {
 class _AppTabsScreenState extends State<AppTabsScreen> {
   int _currentIndex = 0;
   final List<Meal> _favouriteMeals = [];
+  Map<Filter, bool> _selectedFilters = kInitialFilter;
 
   @override
   void initState() {
@@ -55,21 +58,46 @@ class _AppTabsScreenState extends State<AppTabsScreen> {
     }
   }
 
-  void _onSelectScreen(String indentifier) {
+  // # Session8 New Code
+  void _onSelectScreen(String indentifier) async {
     Navigator.of(context).pop();
     if (indentifier == 'filters') {
-      Navigator.of(context).push(
+      final results = await Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
-          builder: (ctx) => const FiltersScreen(),
+          builder: (ctx) => FiltersScreen(
+            currentFilters: _selectedFilters,
+          ),
         ),
       );
+
+      setState(() {
+        _selectedFilters = results ?? kInitialFilter;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // # Session8 New Code
+    final availableMeals = mealList.where((meal) {
+      if (_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
+        return false;
+      }
+      if (_selectedFilters[Filter.lactosFree]! && !meal.isLactoseFree) {
+        return false;
+      }
+      if (_selectedFilters[Filter.vegetarian]! && !meal.isVegetarian) {
+        return false;
+      }
+      if (_selectedFilters[Filter.vegan]! && !meal.isVegan) {
+        return false;
+      }
+      return true;
+    }).toList();
+
     Widget activePage = CategoriesScreen(
       onFavouriteToogle: _onFavouriteToogle,
+      availableMeals: availableMeals,
     );
     String activePageTitle = 'Food Categories';
 
