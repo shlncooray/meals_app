@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:meals_app/data/meals_mock.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/features/category/screens/categories.dart';
 import 'package:meals_app/features/filters/screens/filters.dart';
 import 'package:meals_app/features/meal/screens/meals.dart';
 import 'package:meals_app/models/filter.dart';
 import 'package:meals_app/models/meal.dart';
+import 'package:meals_app/providers/favourites_meal_provider.dart';
+import 'package:meals_app/providers/meals_provider.dart';
 import 'package:meals_app/widgets/app_drawer.dart';
 
-class AppTabsScreen extends StatefulWidget {
+class AppTabsScreen extends ConsumerStatefulWidget {
   const AppTabsScreen({super.key});
 
   @override
-  State<AppTabsScreen> createState() {
+  ConsumerState<AppTabsScreen> createState() {
     return _AppTabsScreenState();
   }
 }
 
-class _AppTabsScreenState extends State<AppTabsScreen> {
+class _AppTabsScreenState extends ConsumerState<AppTabsScreen> {
   int _currentIndex = 0;
-  final List<Meal> _favouriteMeals = [];
   Map<Filter, bool> _selectedFilters = kInitialFilter;
 
   @override
@@ -30,32 +31,6 @@ class _AppTabsScreenState extends State<AppTabsScreen> {
     setState(() {
       _currentIndex = index;
     });
-  }
-
-  void _showSnackBar(String message, Color bgColor) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: bgColor,
-    ));
-  }
-
-  void _onFavouriteToogle(Meal meal) {
-    bool isFavourite = _favouriteMeals.contains(meal);
-
-    if (isFavourite) {
-      setState(() {
-        _favouriteMeals.remove(meal);
-      });
-      _showSnackBar('${meal.title} is no longer a favourite meal',
-          Theme.of(context).colorScheme.error);
-    } else {
-      setState(() {
-        _favouriteMeals.add(meal);
-      });
-      _showSnackBar('${meal.title} is added as a favourite meal',
-          Theme.of(context).colorScheme.primary);
-    }
   }
 
   // # Session8 New Code
@@ -78,8 +53,8 @@ class _AppTabsScreenState extends State<AppTabsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // # Session8 New Code
-    final availableMeals = mealList.where((meal) {
+    final meals = ref.watch(mealsProvider);
+    final availableMeals = meals.where((meal) {
       if (_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
         return false;
       }
@@ -96,15 +71,14 @@ class _AppTabsScreenState extends State<AppTabsScreen> {
     }).toList();
 
     Widget activePage = CategoriesScreen(
-      onFavouriteToogle: _onFavouriteToogle,
       availableMeals: availableMeals,
     );
     String activePageTitle = 'Food Categories';
 
     if (_currentIndex == 1) {
+      final favouriteMeals = ref.watch(favouritesMealsProvider);
       activePage = MealsScreen(
-        meals: _favouriteMeals,
-        onFavouriteToogle: _onFavouriteToogle,
+        meals: favouriteMeals,
       );
       activePageTitle = 'Favourites';
     }

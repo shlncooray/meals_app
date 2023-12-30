@@ -35,13 +35,13 @@ class _FiltersScreenState extends State<FiltersScreen> {
         title: const Text('Your Filters'),
       ),
 
-      // drawer: MainDrawer(
-      //   onSelectScreen: (identifier) {
+      // drawer: AppDrawer(
+      //   onSelecteScreen: (identifier) {
       //     Navigator.of(context).pop();
       //     if (identifier == 'meals') {
       //       Navigator.of(context).pushReplacement(
       //         MaterialPageRoute(
-      //           builder: (ctx) => const TabsScreen(),
+      //           builder: (ctx) => const AppTabsScreen(),
       //         ),
       //       );
       //     }

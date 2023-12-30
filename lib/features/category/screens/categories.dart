@@ -5,12 +5,8 @@ import 'package:meals_app/models/category.dart';
 import 'package:meals_app/models/meal.dart';
 
 class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen(
-      {super.key,
-      required this.onFavouriteToogle,
-      required this.availableMeals});
+  const CategoriesScreen({super.key, required this.availableMeals});
 
-  final void Function(Meal) onFavouriteToogle;
   final List<Meal> availableMeals;
 
   @override
@@ -32,10 +28,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         .toList();
 
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (ctx) => MealsScreen(
-            title: category.title,
-            meals: filteredMeals,
-            onFavouriteToogle: widget.onFavouriteToogle)));
+        builder: (ctx) =>
+            MealsScreen(title: category.title, meals: filteredMeals)));
   }
 
   @override
