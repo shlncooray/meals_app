@@ -38,52 +38,28 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return Consumer(builder: (context, ref, child) {
       final categoryList = ref.watch(categoryProvider);
       return Scaffold(
-          body: switch (categoryList) {
-        AsyncData(:final value) => GridView(
-            padding: const EdgeInsets.all(10),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 1.25,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20),
-            children: [
-              ...value.map((cat) => CategoryItem(
-                  category: cat,
-                  onSelectCategory: () {
-                    _selectCategory(context, cat);
-                  }))
-            ],
-          ),
-        AsyncError() => const Text('Oops, something unexpected happened'),
-        _ => const Center(child: CircularProgressIndicator())
-      });
+          body: RefreshIndicator(
+        onRefresh: () => ref.refresh(categoryProvider.future),
+        child: switch (categoryList) {
+          AsyncData(:final value) => GridView(
+              padding: const EdgeInsets.all(10),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.25,
+                  crossAxisSpacing: 20,
+                  mainAxisSpacing: 20),
+              children: [
+                ...value.map((cat) => CategoryItem(
+                    category: cat,
+                    onSelectCategory: () {
+                      _selectCategory(context, cat);
+                    }))
+              ],
+            ),
+          AsyncError() => const Text('Oops, something unexpected happened'),
+          _ => const Center(child: CircularProgressIndicator())
+        },
+      ));
     });
-    // return Scaffold(
-    //     body: FutureBuilder<List<Category>>(
-    //   future: foodCategories,
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasData) {
-    //       return GridView(
-    //         padding: const EdgeInsets.all(10),
-    //         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-    //             crossAxisCount: 2,
-    //             childAspectRatio: 1.25,
-    //             crossAxisSpacing: 20,
-    //             mainAxisSpacing: 20),
-    //         children: [
-    //           ...snapshot.data!.map((cat) => CategoryItem(
-    //               category: cat,
-    //               onSelectCategory: () {
-    //                 _selectCategory(context, cat);
-    //               }))
-    //         ],
-    //       );
-    //     } else if (snapshot.hasError) {
-    //       return Center(child: Text('${snapshot.error}'));
-    //     } else {
-    //       return const Center(child: CircularProgressIndicator());
-    //     }
-    //   },
-    // ));
   }
 }

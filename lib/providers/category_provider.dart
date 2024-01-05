@@ -8,9 +8,8 @@ part 'category_provider.g.dart';
 
 @riverpod
 Future<List<Category>> category(CategoryRef ref) async {
-  var url =
-      'https://my-json-server.typicode.com/shlncooray/meals_app/categories';
-  final response = await http.get(Uri.parse(url));
+  var url = 'meals-app-prep-default-rtdb.asia-southeast1.firebasedatabase.app';
+  final response = await http.get(Uri.https(url, 'categories.json'));
   final jsonList = json.decode(response.body) as List<dynamic>;
   return jsonList.map((j) => Category.fromJson(j)).toList();
 }
