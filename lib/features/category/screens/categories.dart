@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meals_app/features/category/widgets/category_item.dart';
 import 'package:meals_app/features/meal/screens/meals.dart';
 import 'package:meals_app/models/category.dart';
 import 'package:meals_app/models/meal.dart';
+import 'package:meals_app/providers/category_provider.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key, required this.availableMeals});
@@ -19,7 +21,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   void initState() {
     super.initState();
-    foodCategories = fetchCategoriesFutue();
   }
 
   void _selectCategory(BuildContext context, Category category) {
@@ -34,12 +35,11 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: FutureBuilder<List<Category>>(
-      future: foodCategories,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return GridView(
+    return Consumer(builder: (context, ref, child) {
+      final categoryList = ref.watch(categoryProvider);
+      return Scaffold(
+          body: switch (categoryList) {
+        AsyncData(:final value) => GridView(
             padding: const EdgeInsets.all(10),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
@@ -47,19 +47,43 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20),
             children: [
-              ...snapshot.data!.map((cat) => CategoryItem(
+              ...value.map((cat) => CategoryItem(
                   category: cat,
                   onSelectCategory: () {
                     _selectCategory(context, cat);
                   }))
             ],
-          );
-        } else if (snapshot.hasError) {
-          return Center(child: Text('${snapshot.error}'));
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
-      },
-    ));
+          ),
+        AsyncError() => const Text('Oops, something unexpected happened'),
+        _ => const Center(child: CircularProgressIndicator())
+      });
+    });
+    // return Scaffold(
+    //     body: FutureBuilder<List<Category>>(
+    //   future: foodCategories,
+    //   builder: (context, snapshot) {
+    //     if (snapshot.hasData) {
+    //       return GridView(
+    //         padding: const EdgeInsets.all(10),
+    //         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+    //             crossAxisCount: 2,
+    //             childAspectRatio: 1.25,
+    //             crossAxisSpacing: 20,
+    //             mainAxisSpacing: 20),
+    //         children: [
+    //           ...snapshot.data!.map((cat) => CategoryItem(
+    //               category: cat,
+    //               onSelectCategory: () {
+    //                 _selectCategory(context, cat);
+    //               }))
+    //         ],
+    //       );
+    //     } else if (snapshot.hasError) {
+    //       return Center(child: Text('${snapshot.error}'));
+    //     } else {
+    //       return const Center(child: CircularProgressIndicator());
+    //     }
+    //   },
+    // ));
   }
 }
