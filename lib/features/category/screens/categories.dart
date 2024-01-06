@@ -38,26 +38,29 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     return Consumer(builder: (context, ref, child) {
       final categories = ref.watch(categoryProvider);
       return Scaffold(
-        body: switch (categories) {
-          AsyncData(:final value) => GridView(
-              padding: const EdgeInsets.all(10),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 1.25,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 20),
-              children: [
-                ...value.map((cat) => CategoryItem(
-                    category: cat,
-                    onSelectCategory: () {
-                      _selectCategory(context, cat);
-                    }))
-              ],
-            ),
-          AsyncError(:final error) =>
-            Text('Oops, something unexpected happened $error'),
-          _ => const Center(child: CircularProgressIndicator()),
-        },
+        body: RefreshIndicator(
+          onRefresh: () => ref.refresh(categoryProvider.future),
+          child: switch (categories) {
+            AsyncData(:final value) => GridView(
+                padding: const EdgeInsets.all(10),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.25,
+                    crossAxisSpacing: 20,
+                    mainAxisSpacing: 20),
+                children: [
+                  ...value.map((cat) => CategoryItem(
+                      category: cat,
+                      onSelectCategory: () {
+                        _selectCategory(context, cat);
+                      }))
+                ],
+              ),
+            AsyncError(:final error) =>
+              Text('Oops, something unexpected happened $error'),
+            _ => const Center(child: CircularProgressIndicator()),
+          },
+        ),
       );
     });
   }
